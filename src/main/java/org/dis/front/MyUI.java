@@ -9,6 +9,10 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.*;
 import org.dis.back.BRException;
 import org.dis.back.EmpleadoBR;
+import org.dis.back.TipoEmpleado;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window 
@@ -33,23 +37,26 @@ public class MyUI extends UI {
         final HorizontalLayout salarioNeto = new HorizontalLayout();
         final VerticalLayout salarioBrutoContenedor = new VerticalLayout();
         final VerticalLayout salarioNetoContenedor = new VerticalLayout();
+        final VerticalLayout labelsBruto = new VerticalLayout();
+        final VerticalLayout labelsNeto = new VerticalLayout();
 
-        TextField tipo = creaLabel("Tipo de empleado");
+        //TextField tipo = creaLabel("Tipo de empleado");
+        ComboBox <String> tipoEmpleadoComboBox = new ComboBox<>("tipo de empleado",
+                Arrays.asList(TipoEmpleado.ENCARGADO, TipoEmpleado.VENDEDOR));
+
         TextField ventasMes = creaLabel("Ventas del mes");
         TextField horasExtra = creaLabel("Horas extra");
-        salarioBruto.addComponents(tipo, ventasMes, horasExtra);
+        salarioBruto.addComponents(tipoEmpleadoComboBox, ventasMes, horasExtra);
 
         TextField inputSalarioBruto = creaLabel("Salario bruto del empleado");
         salarioNeto.addComponent(inputSalarioBruto);
 
         Button botonSalarioBruto = new Button("Calcula Salario Bruto");
         botonSalarioBruto.addClickListener(e -> {
-            String tipoEmpleadoIn = tipo.getValue();
+            String tipoEmpleadoIn = tipoEmpleadoComboBox.getValue();
             double ventasMesIn = Double.parseDouble( ventasMes.getValue()) ;
             double horasExtraIn = Double.parseDouble( horasExtra.getValue()) ;
-
             EmpleadoBR empleado = new EmpleadoBR();
-
             try {
                 double resultado = empleado.calculaSalarioBruto(tipoEmpleadoIn, ventasMesIn, horasExtraIn);
                 Label labelSalarioBruto = new Label("El salario bruto obtenido es: "+ resultado +"€");
@@ -62,10 +69,22 @@ public class MyUI extends UI {
 
         Button botonSalarioNeto = new Button("Calcula Salario Neto");
         botonSalarioNeto.addClickListener(e -> {
+            double SalarioBrutoIn = Double.parseDouble( inputSalarioBruto.getValue()) ;
+            EmpleadoBR empleado = new EmpleadoBR();
+            try {
+                double resultado = empleado.calculaSalarioNeto(SalarioBrutoIn);
+                Label labelSalarioNeto = new Label("El salario neto obtenido es: "+ resultado +"€");
+                labelsNeto.removeAllComponents();
+                labelsNeto.addComponent(labelSalarioNeto);
+            } catch (BRException ex) {
+                Label labelSalarioNeto = new Label( ex.getMessage() );
+                labelsNeto.removeAllComponents();
+                labelsNeto.addComponent(labelSalarioNeto);
+            }
         });
 
-        salarioBrutoContenedor.addComponents(salarioBruto, botonSalarioBruto);
-        salarioNetoContenedor.addComponents(salarioNeto, botonSalarioNeto);
+        salarioBrutoContenedor.addComponents(salarioBruto, botonSalarioBruto, labelsBruto);
+        salarioNetoContenedor.addComponents(salarioNeto, botonSalarioNeto, labelsNeto);
 
         TabSheet tabs = new TabSheet();
         tabs.addTab(salarioBrutoContenedor).setCaption("Calcula Salario Bruto");

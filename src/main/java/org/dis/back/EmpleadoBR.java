@@ -22,7 +22,7 @@ public class EmpleadoBR {
         return total_salario;
     }
 
-    double calculaSalarioNeto(double salarioBruto) throws BRException{
+    public double calculaSalarioNeto(double salarioBruto) throws BRException{
         if (salarioBruto < 0) {
             throw new BRException("Salario neto total menor que 0");
         }
